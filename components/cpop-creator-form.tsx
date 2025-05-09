@@ -1,25 +1,37 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { CalendarIcon, Loader2 } from "lucide-react"
-import { format } from "date-fns"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { Card, CardContent } from "@/components/ui/card"
-import { WalletMultiButton } from "@/components/solana/wallet-multi-button"
-import { useWallet } from "@solana/wallet-adapter-react"
-import { toast } from "@/components/ui/use-toast"
-import { mintCPOP } from "@/lib/solana/mint-cpop"
-import ImageUpload from "@/components/image-upload"
+import ImageUpload from "@/components/image-upload";
+import { WalletMultiButton } from "@/components/solana/wallet-multi-button";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { mintCPOP } from "@/lib/solana/mint-cpop";
+import { cn } from "@/lib/utils";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 const formSchema = z
   .object({
@@ -58,11 +70,22 @@ const formSchema = z
   .refine((data) => data.endDate > data.startDate, {
     message: "End date must be after start date.",
     path: ["endDate"],
-  })
+  });
 
 export default function CPOPCreatorForm() {
-  const { connected, publicKey } = useWallet()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { connected, publicKey, wallet, connecting } = useWallet();
+  const { connection } = useConnection();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Add effect to log wallet state changes
+  useEffect(() => {
+    console.log("Wallet state changed:", {
+      connected,
+      connecting,
+      publicKey: publicKey?.toString(),
+      wallet: wallet?.adapter.name,
+    });
+  }, [connected, connecting, publicKey, wallet]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,43 +98,88 @@ export default function CPOPCreatorForm() {
       amount: 100,
       location: "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!connected || !publicKey) {
+    console.log("Form submission - Wallet state:", {
+      connected,
+      connecting,
+      publicKey: publicKey?.toString(),
+      wallet: wallet?.adapter.name,
+    });
+
+    // Wait for wallet to finish connecting if it's in the process
+    if (connecting) {
+      toast({
+        title: "Connecting wallet...",
+        description: "Please wait while we connect your wallet.",
+      });
+      return;
+    }
+
+    if (!connected) {
       toast({
         title: "Wallet not connected",
         description: "Please connect your Solana wallet to continue.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
+    }
+
+    if (!publicKey) {
+      toast({
+        title: "No public key",
+        description:
+          "Unable to get your wallet's public key. Please try reconnecting your wallet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!wallet) {
+      toast({
+        title: "No wallet instance",
+        description:
+          "Unable to access wallet instance. Please try reconnecting your wallet.",
+        variant: "destructive",
+      });
+      return;
     }
 
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
-      // Call the mint function
-      await mintCPOP({
+      console.log(wallet);
+
+      // Call the mint function with connection and wallet
+      const result = await mintCPOP({
         ...values,
         walletPublicKey: publicKey.toString(),
-      })
+        connection,
+        wallet,
+      });
+
+      console.log("Mint result:", result);
 
       toast({
         title: "cPOP created!",
         description: `Successfully created ${values.amount} cPOP tokens for "${values.eventName}"`,
-      })
+      });
 
       // Reset the form
-      form.reset()
+      form.reset();
     } catch (error) {
-      console.error("Error creating cPOP:", error)
+      console.error("Error creating cPOP:", error);
       toast({
         title: "Error",
-        description: "Failed to create cPOP tokens. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create cPOP tokens. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -161,9 +229,14 @@ export default function CPOPCreatorForm() {
                 <FormItem>
                   <FormLabel>Event Image</FormLabel>
                   <FormControl>
-                    <ImageUpload value={field.value} onChange={field.onChange} />
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
-                  <FormDescription>Upload an image for your event (max 5MB)</FormDescription>
+                  <FormDescription>
+                    Upload an image for your event (max 5MB)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -213,15 +286,27 @@ export default function CPOPCreatorForm() {
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -240,15 +325,27 @@ export default function CPOPCreatorForm() {
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -267,7 +364,9 @@ export default function CPOPCreatorForm() {
                     <FormControl>
                       <Input type="number" min={1} {...field} />
                     </FormControl>
-                    <FormDescription>Number of tokens to create</FormDescription>
+                    <FormDescription>
+                      Number of tokens to create
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -280,7 +379,10 @@ export default function CPOPCreatorForm() {
                   <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="Virtual or physical location" {...field} />
+                      <Input
+                        placeholder="Virtual or physical location"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -288,7 +390,11 @@ export default function CPOPCreatorForm() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || !connected}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || !connected}
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -302,5 +408,5 @@ export default function CPOPCreatorForm() {
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }
