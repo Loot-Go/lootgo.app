@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import createToken from "@/app/actions";
-import ImageUpload from "@/components/image-upload";
 import { WalletMultiButton } from "@/components/solana/wallet-multi-button";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -164,7 +163,20 @@ export default function CPOPCreatorForm() {
         name: values.eventName,
         symbol: values.organizerName,
         uri: values.website,
-        additionalMetadata: [["key", "value"]],
+        additionalMetadata: [
+          ["description", values.description],
+          ["location", values.location],
+          ["startDate", values.startDate.toISOString()],
+          ["endDate", values.endDate.toISOString()],
+        ],
+        eventName: values.eventName,
+        organizerName: values.organizerName,
+        description: values.description,
+        website: values.website,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        amount: values.amount,
+        location: values.location,
       });
 
       setTxLogs(logs);
@@ -260,26 +272,6 @@ export default function CPOPCreatorForm() {
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Image</FormLabel>
-                    <FormControl>
-                      <ImageUpload
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload an image for your event (max 5MB)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -448,13 +440,18 @@ export default function CPOPCreatorForm() {
         </CardContent>
       </Card>
 
-      <div className="mt-4">
+      <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-700 mb-5">
         {txLogs.map((logs) => {
           return (
-            <p>
-              {logs.type}
-              <a href={logs.tx} target="_blank" rel="noopener noreferrer">
-                {logs.txId}
+            <p key={logs.txId}>
+              <span className="text-gray-400 mr-2">{logs.type}</span>
+              <a
+                href={logs.tx}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs"
+              >
+                View on Solana Explorer
               </a>
             </p>
           );

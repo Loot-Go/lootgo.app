@@ -1,4 +1,11 @@
-import { compress, createTokenPool } from "@lightprotocol/compressed-token";
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import {
+  compress,
+  createTokenPool,
+  transfer,
+} from "@lightprotocol/compressed-token";
 import { confirmTx, createRpc } from "@lightprotocol/stateless.js";
 import {
   createInitializeMetadataPointerInstruction,
@@ -18,6 +25,7 @@ import {
 } from "@solana/spl-token-metadata";
 import {
   Keypair,
+  PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
   Transaction,
@@ -29,11 +37,29 @@ const createToken = async ({
   symbol,
   uri,
   additionalMetadata,
+  eventName,
+  organizerName,
+  description,
+  website,
+  startDate,
+  endDate,
+  amount,
+  location,
+  imageUrl,
 }: {
   name: string;
   symbol: string;
   uri: string;
-  additionalMetadata: string[][];
+  additionalMetadata: [string, string][];
+  eventName: string;
+  organizerName: string;
+  description: string;
+  website: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  location: string;
+  imageUrl?: string;
 }) => {
   const logs = [];
 
@@ -46,10 +72,10 @@ const createToken = async ({
   // @jijin enter the name of the token
   const metadata: TokenMetadata = {
     mint: mint.publicKey,
-    name: "name",
-    symbol: "symbol",
-    uri: "uri",
-    additionalMetadata: [["key", "value"]],
+    name,
+    symbol,
+    uri,
+    additionalMetadata,
   };
 
   const mintLen = getMintLen([ExtensionType.MetadataPointer]);
@@ -185,7 +211,60 @@ const createToken = async ({
     tx: `https://explorer.solana.com/tx/${compressedTokenTxId}?cluster=devnet`,
   });
 
+  // Store the event details in the database
+  const cpop = await prisma.cPOP.create({
+    data: {
+      eventName,
+      organizerName,
+      description,
+      website,
+      startDate,
+      endDate,
+      amount,
+      location,
+      imageUrl,
+      tokenAddress: mint.publicKey.toString(),
+      tokenId: mint.publicKey.toString(),
+      tokenType: "compressed",
+      tokenURI: uri,
+      // tokenMetadata: metadata,
+    },
+  });
+
   return logs;
+};
+
+export const claim = async (
+  wallet_address: PublicKey,
+  mint_address: PublicKey
+) => {
+  const payer = Keypair.fromSecretKey(
+    bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!)
+  );
+
+  const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
+  const connection = createRpc(RPC_ENDPOINT);
+  // @jijin enter the mint address saved while creation here
+  // @jijin to address of recipient
+  const to = new PublicKey(wallet_address);
+  const mint = new PublicKey(mint_address);
+  const transferCompressedTxId = await transfer(
+    connection,
+    payer,
+    mint,
+    1e5,
+    payer,
+    to
+  );
+  console.log(`transfer-compressed success! txId: ${transferCompressedTxId}`);
+  // @jijin enter the address of recipient to check balance
+
+  // const publicKey = new PublicKey(
+  //   "9ynAU3rnmsocfstoDPaDxx9wVxf7kHEXzNbU4L55UcZ3"
+  // );
+  // const balances = await connection.getCompressedTokenBalancesByOwnerV2(
+  //   publicKey
+  // );
 };
 
 export default createToken;

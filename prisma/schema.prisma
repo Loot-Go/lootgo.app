@@ -1,0 +1,28 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model CPOP {
+    id            String   @id @default(uuid())
+    eventName     String
+    organizerName String
+    description   String
+    website       String
+    startDate     DateTime
+    endDate       DateTime
+    amount        Int
+    location      String
+    imageUrl      String?
+    tokenAddress  String?
+    tokenId       String?
+    tokenType     String?
+    tokenURI      String?
+    tokenMetadata Json?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
