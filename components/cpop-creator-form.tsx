@@ -1,5 +1,6 @@
 "use client";
 
+import { UploadButton } from "@/lib/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
@@ -44,9 +45,7 @@ const formSchema = z
     organizerName: z.string().min(2, {
       message: "Organizer name must be at least 2 characters.",
     }),
-    // image: z.string().url({
-    //   message: "Please upload an image.",
-    // }),
+    imageUrl: z.string().optional(),
     description: z.string().min(10, {
       message: "Description must be at least 10 characters.",
     }),
@@ -55,6 +54,12 @@ const formSchema = z
     }),
     startDate: z.date({
       required_error: "Please select a start date.",
+    }),
+    latitude: z.string().min(1, {
+      message: "Latitude is required.",
+    }),
+    longitude: z.string().min(1, {
+      message: "Longitude is required.",
     }),
     endDate: z
       .date({
@@ -102,7 +107,7 @@ export default function CPOPCreatorForm() {
     defaultValues: {
       eventName: "",
       organizerName: "",
-      // image: "",
+      imageUrl: "",
       description: "",
       website: "",
       amount: 100,
@@ -174,6 +179,7 @@ export default function CPOPCreatorForm() {
         description: values.description,
         website: values.website,
         startDate: values.startDate,
+        imageUrl: values.imageUrl,
         endDate: values.endDate,
         amount: values.amount,
         location: values.location,
@@ -244,53 +250,98 @@ export default function CPOPCreatorForm() {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="eventName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Event Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Solana Hackathon 2025" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <div>
+                    <p className="text-gray-400 mb-2 text-center text-xs">
+                      Upload an image for your cPOP
+                    </p>
 
-                <FormField
-                  control={form.control}
-                  name="organizerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organizer Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Solana Foundation" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    {form.watch("imageUrl") ? (
+                      <div className="w-full grid place-items-center">
+                        <img
+                          src={form.watch("imageUrl")}
+                          alt="Uploaded Image"
+                          className="w-40 h-40 rounded-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full">
+                        <img
+                          src={form.watch("imageUrl")}
+                          alt="Uploaded Image"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res) => {
+                        console.log("Files: ", res);
+                        form.setValue("imageUrl", res[0].ufsUrl);
+                        alert("Upload Completed");
+                      }}
+                      onUploadError={(error: Error) => {
+                        alert(`ERROR! ${error.message}`);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-2 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="eventName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Solana Hackathon 2025"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="organizerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Organizer Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Solana Foundation" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Describe your event and what participants will receive"
+                            className="min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe your event and what participants will receive"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -422,6 +473,37 @@ export default function CPOPCreatorForm() {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <Button
                 type="submit"
                 className="w-full"
@@ -441,25 +523,27 @@ export default function CPOPCreatorForm() {
         </CardContent>
       </Card>
 
-      <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-700 mb-5">
-        {txLogs.map((logs) => {
-          return (
-            <p key={logs.txId}>
-              <span className="text-gray-400 mr-2">{logs.type}</span>
-              <a
-                href={logs.tx}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs"
-              >
-                View on Solana Explorer
-              </a>
-            </p>
-          );
-        })}
-      </div>
+      {txLogs.length > 1 ? (
+        <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-700 mb-5">
+          {txLogs.map((logs) => {
+            return (
+              <p key={logs.txId}>
+                <span className="text-gray-400 mr-2">{logs.type}</span>
+                <a
+                  href={logs.tx}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs"
+                >
+                  View on Solana Explorer
+                </a>
+              </p>
+            );
+          })}
+        </div>
+      ) : null}
 
-      <Button onClick={getBalance}>Get Balance</Button>
+      {/* <Button onClick={getBalance}>Get Balance</Button> */}
     </div>
   );
 }

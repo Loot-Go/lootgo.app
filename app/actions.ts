@@ -182,7 +182,7 @@ const createToken = async ({
     ata.address,
     payer.publicKey,
     // @jijin enter total number of tokens to mint multiplied by 10^decimals
-    1e5,
+    amount * Math.pow(10, decimals),
     undefined,
     undefined,
     TOKEN_2022_PROGRAM_ID
@@ -200,7 +200,7 @@ const createToken = async ({
     payer,
     mint.publicKey,
     // @jijin enter total number of tokens to mint multiplied by 10^decimals
-    1e5,
+    amount * Math.pow(10, decimals),
     payer,
     ata.address,
     payer.publicKey
