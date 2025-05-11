@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import createToken from "@/app/actions";
 import ImageUpload from "@/components/image-upload";
 import { WalletMultiButton } from "@/components/solana/wallet-multi-button";
 import { Button } from "@/components/ui/button";
@@ -29,39 +30,11 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { mintCPOP } from "@/lib/solana/mint-cpop";
 import { cn } from "@/lib/utils";
+import { transfer } from "@lightprotocol/compressed-token";
+import { createRpc } from "@lightprotocol/stateless.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { confirmTx, createRpc } from "@lightprotocol/stateless.js";
-import {
-  compress,
-  createTokenPool,
-  transfer,
-} from "@lightprotocol/compressed-token";
-import {
-  getOrCreateAssociatedTokenAccount,
-  mintTo as mintToSpl,
-  TOKEN_2022_PROGRAM_ID,
-  createInitializeMetadataPointerInstruction,
-  createInitializeMintInstruction,
-  ExtensionType,
-  getMintLen,
-  LENGTH_SIZE,
-  TYPE_SIZE,
-} from "@solana/spl-token";
-import {
-  Keypair,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  Transaction,
-  PublicKey,
-} from "@solana/web3.js";
-import {
-  createInitializeInstruction,
-  pack,
-  TokenMetadata,
-} from "@solana/spl-token-metadata";
-import dotenv from "dotenv";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 
 const formSchema = z
@@ -105,6 +78,13 @@ const formSchema = z
 
 export default function CPOPCreatorForm() {
   const { connected, publicKey, wallet, connecting } = useWallet();
+  const [txLogs, setTxLogs] = useState<
+    {
+      type: string;
+      txId: string;
+      tx: string;
+    }[]
+  >([]);
   const { connection } = useConnection();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -180,125 +160,14 @@ export default function CPOPCreatorForm() {
     try {
       setIsSubmitting(true);
 
-      console.log(wallet);
-      const payer = Keypair.fromSecretKey(bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!));
-      const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
-      const connection = createRpc(RPC_ENDPOINT);
-      // @ jijin mint address (token address) -- save in backend for airdrops
-      const mint = Keypair.generate();
-      const decimals = 9;
-      // @jijin enter the name of the token
-      const metadata: TokenMetadata = {
-        mint: mint.publicKey,
-        name: "name",
-        symbol: "symbol",
-        uri: "uri",
+      const logs = await createToken({
+        name: values.eventName,
+        symbol: values.organizerName,
+        uri: values.website,
         additionalMetadata: [["key", "value"]],
-      };
+      });
 
-      const mintLen = getMintLen([ExtensionType.MetadataPointer]);
-
-      const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
-
-      // @jijin this is just to get devnet tokens to make txs
-      // airdrop to pay gas
-      await confirmTx(
-        connection,
-        await connection.requestAirdrop(payer.publicKey, 1e7)
-      );
-
-      const mintLamports = await connection.getMinimumBalanceForRentExemption(
-        mintLen + metadataLen
-      );
-      const mintTransaction = new Transaction().add(
-        SystemProgram.createAccount({
-          fromPubkey: payer.publicKey,
-          newAccountPubkey: mint.publicKey,
-          space: mintLen,
-          lamports: mintLamports,
-          programId: TOKEN_2022_PROGRAM_ID,
-        }),
-        createInitializeMetadataPointerInstruction(
-          mint.publicKey,
-          payer.publicKey,
-          mint.publicKey,
-          TOKEN_2022_PROGRAM_ID
-        ),
-        createInitializeMintInstruction(
-          mint.publicKey,
-          decimals,
-          payer.publicKey,
-          null,
-          TOKEN_2022_PROGRAM_ID
-        ),
-        createInitializeInstruction({
-          programId: TOKEN_2022_PROGRAM_ID,
-          mint: mint.publicKey,
-          metadata: mint.publicKey,
-          name: metadata.name,
-          symbol: metadata.symbol,
-          uri: metadata.uri,
-          mintAuthority: payer.publicKey,
-          updateAuthority: payer.publicKey,
-        })
-      );
-      const txId = await sendAndConfirmTransaction(connection, mintTransaction, [
-        payer,
-        mint,
-      ]);
-
-      console.log(`txId: ${txId}`);
-
-      // register the mint with the Compressed-Token program
-      const txId2 = await createTokenPool(
-        connection,
-        payer,
-        mint.publicKey,
-        undefined,
-        TOKEN_2022_PROGRAM_ID
-      );
-      console.log(`register-mint success! txId: ${txId2}`);
-
-      const ata = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer,
-        mint.publicKey,
-        payer.publicKey,
-        undefined,
-        undefined,
-        undefined,
-        TOKEN_2022_PROGRAM_ID
-      );
-
-      console.log(`ATA: ${ata.address}`);
-      // Mint SPL
-      const mintTxId = await mintToSpl(
-        connection,
-        payer,
-        mint.publicKey,
-        ata.address,
-        payer.publicKey,
-        // @jijin enter total number of tokens to mint multiplied by 10^decimals
-        1e5,
-        undefined,
-        undefined,
-        TOKEN_2022_PROGRAM_ID
-      );
-      console.log(`mint-spl success! txId: ${mintTxId}`);
-
-      const compressedTokenTxId = await compress(
-        connection,
-        payer,
-        mint.publicKey,
-        // @jijin enter total number of tokens to mint multiplied by 10^decimals
-        1e5,
-        payer,
-        ata.address,
-        payer.publicKey
-      );
-      console.log(`compressed-token success! txId: ${compressedTokenTxId}`);
-
-
+      setTxLogs(logs);
 
       toast({
         title: "cPOP created!",
@@ -323,14 +192,16 @@ export default function CPOPCreatorForm() {
   }
 
   async function getBalance() {
-    const payer = Keypair.fromSecretKey(bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!));
+    const payer = Keypair.fromSecretKey(
+      bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!)
+    );
 
     const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
-      const connection = createRpc(RPC_ENDPOINT);
+    const connection = createRpc(RPC_ENDPOINT);
     // @jijin enter the mint address saved while creation here
-    const mint = new PublicKey("")
+    const mint = new PublicKey("");
     // @jijin to address of recipient
-    const to = new PublicKey("")
+    const to = new PublicKey("");
     const transferCompressedTxId = await transfer(
       connection,
       payer,
@@ -341,196 +212,69 @@ export default function CPOPCreatorForm() {
     );
     console.log(`transfer-compressed success! txId: ${transferCompressedTxId}`);
     // @jijin enter the address of recipient to check balance
-    const publicKey = new PublicKey("9ynAU3rnmsocfstoDPaDxx9wVxf7kHEXzNbU4L55UcZ3")
-    const balances =
-        await connection.getCompressedTokenBalancesByOwnerV2(publicKey);
+    const publicKey = new PublicKey(
+      "9ynAU3rnmsocfstoDPaDxx9wVxf7kHEXzNbU4L55UcZ3"
+    );
+    const balances = await connection.getCompressedTokenBalancesByOwnerV2(
+      publicKey
+    );
     console.log(balances);
   }
 
   return (
     <div>
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex justify-end mb-6">
-          <WalletMultiButton />
-        </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-end mb-6">
+            <WalletMultiButton />
+          </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="eventName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Solana Hackathon 2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="organizerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organizer Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Solana Foundation" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
-                name="eventName"
+                name="image"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Name</FormLabel>
+                    <FormLabel>Event Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="Solana Hackathon 2025" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="organizerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organizer Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Solana Foundation" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Event Image</FormLabel>
-                  <FormControl>
-                    <ImageUpload
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload an image for your event (max 5MB)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe your event and what participants will receive"
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://yourevent.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Event Start Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Event End Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount of cPOP</FormLabel>
-                    <FormControl>
-                      <Input type="number" min={1} {...field} />
+                      <ImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormDescription>
-                      Number of tokens to create
+                      Upload an image for your event (max 5MB)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -539,13 +283,14 @@ export default function CPOPCreatorForm() {
 
               <FormField
                 control={form.control}
-                name="location"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Virtual or physical location"
+                      <Textarea
+                        placeholder="Describe your event and what participants will receive"
+                        className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
@@ -553,28 +298,170 @@ export default function CPOPCreatorForm() {
                   </FormItem>
                 )}
               />
-            </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting || !connected}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating cPOP...
-                </>
-              ) : (
-                "Create cPOP Tokens"
-              )}
-            </Button>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://yourevent.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      </CardContent>
-    </Card>
-    <Button onClick={getBalance}>Get Balance</Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Event Start Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Event End Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount of cPOP</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={1} {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Number of tokens to create
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Virtual or physical location"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || !connected}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating cPOP...
+                  </>
+                ) : (
+                  "Create cPOP Tokens"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <div className="mt-4">
+        {txLogs.map((logs) => {
+          return (
+            <p>
+              {logs.type}
+              <a href={logs.tx} target="_blank" rel="noopener noreferrer">
+                {logs.txId}
+              </a>
+            </p>
+          );
+        })}
+      </div>
+
+      <Button onClick={getBalance}>Get Balance</Button>
     </div>
   );
 }
