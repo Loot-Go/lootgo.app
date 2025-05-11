@@ -4,7 +4,6 @@ import { UploadButton } from "@/lib/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { QRCode } from "react-qrcode-logo";
@@ -33,11 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { transfer } from "@lightprotocol/compressed-token";
-import { createRpc } from "@lightprotocol/stateless.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import bs58 from "bs58";
 
 const formSchema = z
   .object({
@@ -84,7 +79,6 @@ const formSchema = z
 
 export default function CPOPCreatorForm() {
   const { connected, publicKey, wallet, connecting } = useWallet();
-  const searchParams = useSearchParams();
   const [txLogs, setTxLogs] = useState<
     {
       type: string;
@@ -92,7 +86,7 @@ export default function CPOPCreatorForm() {
       tx: string;
     }[]
   >([]);
-  const [cpop, setCpop] = useState<string | null>(searchParams.get("cpop"));
+  const [cpop, setCpop] = useState<string | null>(null);
   const { connection } = useConnection();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -215,36 +209,6 @@ export default function CPOPCreatorForm() {
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  async function getBalance() {
-    const payer = Keypair.fromSecretKey(
-      bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!)
-    );
-
-    const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
-    const connection = createRpc(RPC_ENDPOINT);
-    // @jijin enter the mint address saved while creation here
-    const mint = new PublicKey("");
-    // @jijin to address of recipient
-    const to = new PublicKey("");
-    const transferCompressedTxId = await transfer(
-      connection,
-      payer,
-      mint,
-      1e5,
-      payer,
-      to
-    );
-    console.log(`transfer-compressed success! txId: ${transferCompressedTxId}`);
-    // @jijin enter the address of recipient to check balance
-    const publicKey = new PublicKey(
-      "9ynAU3rnmsocfstoDPaDxx9wVxf7kHEXzNbU4L55UcZ3"
-    );
-    const balances = await connection.getCompressedTokenBalancesByOwnerV2(
-      publicKey
-    );
-    console.log(balances);
   }
 
   return (
