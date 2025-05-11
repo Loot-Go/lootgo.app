@@ -177,6 +177,7 @@ export default function CPOPCreatorForm() {
         endDate: values.endDate,
         amount: values.amount,
         location: values.location,
+        creator_address: publicKey.toString(),
       });
 
       setTxLogs(logs);

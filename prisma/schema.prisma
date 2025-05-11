@@ -1,28 +1,43 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model CPOP {
-    id            String   @id @default(uuid())
-    eventName     String
-    organizerName String
-    description   String
-    website       String
-    startDate     DateTime
-    endDate       DateTime
-    amount        Int
-    location      String
-    imageUrl      String?
-    tokenAddress  String?
-    tokenId       String?
-    tokenType     String?
-    tokenURI      String?
-    tokenMetadata Json?
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+model Cpop {
+  id              String      @id @default(uuid())
+  eventName       String
+  organizerName   String
+  description     String
+  website         String
+  startDate       DateTime
+  endDate         DateTime
+  amount          Int
+  location        String
+  imageUrl        String?
+  tokenAddress    String?
+  tokenId         String?
+  tokenType       String?
+  tokenURI        String?
+  tokenMetadata   Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  creator_address String?
+  claims          CpopClaim[]
+}
+
+model CpopClaim {
+  id            String   @id @default(uuid())
+  cpopId        String
+  walletAddress String
+  tokenAddress  String?
+  claimedAt     DateTime @default(now())
+  cpop          Cpop     @relation(fields: [cpopId], references: [id])
+
+  @@unique([cpopId, walletAddress])
+  @@index([walletAddress])
+  @@index([cpopId])
 }

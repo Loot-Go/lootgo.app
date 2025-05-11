@@ -47,6 +47,7 @@
     "@solana/wallet-adapter-react-ui": "latest",
     "@solana/wallet-adapter-wallets": "latest",
     "@solana/web3.js": "latest",
+    "@uploadthing/react": "^7.3.1",
     "autoprefixer": "^10.4.20",
     "bs58": "^6.0.0",
     "class-variance-authority": "^0.7.1",
@@ -68,6 +69,7 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "uploadthing": "^7.7.2",
     "vaul": "^0.9.6",
     "zod": "latest"
   },

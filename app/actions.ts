@@ -46,6 +46,7 @@ const createToken = async ({
   amount,
   location,
   imageUrl,
+  creator_address,
 }: {
   name: string;
   symbol: string;
@@ -60,6 +61,7 @@ const createToken = async ({
   amount: number;
   location: string;
   imageUrl?: string;
+  creator_address: string;
 }) => {
   const logs = [];
 
@@ -228,6 +230,7 @@ const createToken = async ({
       tokenType: "compressed",
       tokenURI: uri,
       // tokenMetadata: metadata,
+      creator_address,
     },
   });
 
@@ -244,8 +247,30 @@ export const claim = async (
 
   const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
   const connection = createRpc(RPC_ENDPOINT);
-  // @jijin enter the mint address saved while creation here
-  // @jijin to address of recipient
+
+  // Find the CPOP record by token address
+  const cpop = await prisma.cPOP.findFirst({
+    where: {
+      tokenAddress: mint_address.toString(),
+    },
+  });
+
+  if (!cpop) {
+    throw new Error("CPOP not found");
+  }
+
+  // Check if claim already exists
+  const existingClaim = await prisma.cPOPClaim.findFirst({
+    where: {
+      cpopId: cpop.id,
+      walletAddress: wallet_address.toString(),
+    },
+  });
+
+  if (existingClaim) {
+    throw new Error("CPOP already claimed by this wallet");
+  }
+
   const to = new PublicKey(wallet_address);
   const mint = new PublicKey(mint_address);
   const transferCompressedTxId = await transfer(
@@ -257,14 +282,21 @@ export const claim = async (
     to
   );
   console.log(`transfer-compressed success! txId: ${transferCompressedTxId}`);
-  // @jijin enter the address of recipient to check balance
 
-  // const publicKey = new PublicKey(
-  //   "9ynAU3rnmsocfstoDPaDxx9wVxf7kHEXzNbU4L55UcZ3"
-  // );
-  // const balances = await connection.getCompressedTokenBalancesByOwnerV2(
-  //   publicKey
-  // );
+  // Store the claim record
+  await prisma.cPOPClaim.create({
+    data: {
+      cpopId: cpop.id,
+      walletAddress: wallet_address.toString(),
+      tokenAddress: mint_address.toString(),
+    },
+  });
+
+  return {
+    success: true,
+    txId: transferCompressedTxId,
+    message: "CPOP claimed successfully",
+  };
 };
 
 export default createToken;
