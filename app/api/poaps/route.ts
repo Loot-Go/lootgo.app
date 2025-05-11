@@ -33,21 +33,10 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to return only necessary information
     const poapTokens = claims.map((claim: CpopClaim & { cpop: Cpop }) => ({
-      tokenId: claim.cpop.tokenId,
-      tokenAddress: claim.cpop.tokenAddress,
-      eventName: claim.cpop.eventName,
-      organizerName: claim.cpop.organizerName,
-      description: claim.cpop.description,
-      website: claim.cpop.website,
-      startDate: claim.cpop.startDate,
-      endDate: claim.cpop.endDate,
-      location: claim.cpop.location,
-      imageUrl: claim.cpop.imageUrl,
-      claimedAt: claim.claimedAt,
+      image: claim.cpop.imageUrl,
     }));
 
     return NextResponse.json({
-      success: true,
       data: poapTokens,
     });
   } catch (error) {

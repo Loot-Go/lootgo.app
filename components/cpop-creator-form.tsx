@@ -4,6 +4,7 @@ import { UploadButton } from "@/lib/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { QRCode } from "react-qrcode-logo";
@@ -83,6 +84,7 @@ const formSchema = z
 
 export default function CPOPCreatorForm() {
   const { connected, publicKey, wallet, connecting } = useWallet();
+  const searchParams = useSearchParams();
   const [txLogs, setTxLogs] = useState<
     {
       type: string;
@@ -90,7 +92,7 @@ export default function CPOPCreatorForm() {
       tx: string;
     }[]
   >([]);
-  const [cpop, setCpop] = useState<string | null>();
+  const [cpop, setCpop] = useState<string | null>(searchParams.get("cpop"));
   const { connection } = useConnection();
   const [isSubmitting, setIsSubmitting] = useState(false);
 

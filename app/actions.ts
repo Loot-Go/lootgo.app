@@ -247,11 +247,9 @@ export const claim = async (
   wallet_address: PublicKey,
   mint_address: PublicKey
 ) => {
-  const payer = Keypair.fromSecretKey(
-    bs58.decode(process.env.NEXT_PUBLIC_PAYER_KEYPAIR!)
-  );
+  const payer = Keypair.fromSecretKey(bs58.decode(process.env.PAYER_KEYPAIR!));
 
-  const RPC_ENDPOINT = process.env.NEXT_PUBLIC_RPC_CLIENT!;
+  const RPC_ENDPOINT = process.env.RPC_CLIENT!;
   const connection = createRpc(RPC_ENDPOINT);
 
   // Find the CPOP record by token address
