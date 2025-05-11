@@ -22,12 +22,12 @@ model Cpop {
   tokenId         String?
   tokenType       String?
   tokenURI        String?
-  lat             String?
-  lng             String?
   tokenMetadata   Json?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   creator_address String?
+  lat             Float?
+  long            Float?
   claims          CpopClaim[]
 }
 

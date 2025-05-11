@@ -47,6 +47,8 @@ const createToken = async ({
   location,
   imageUrl,
   creator_address,
+  latitude,
+  longitude,
 }: {
   name: string;
   symbol: string;
@@ -62,6 +64,8 @@ const createToken = async ({
   location: string;
   imageUrl?: string;
   creator_address: string;
+  latitude: number;
+  longitude: number;
 }) => {
   const logs = [];
 
@@ -214,7 +218,7 @@ const createToken = async ({
   });
 
   // Store the event details in the database
-  const cpop = await prisma.cPOP.create({
+  const cpop = await prisma.cpop.create({
     data: {
       eventName,
       organizerName,
@@ -229,12 +233,14 @@ const createToken = async ({
       tokenId: mint.publicKey.toString(),
       tokenType: "compressed",
       tokenURI: uri,
+      lat: latitude,
+      long: longitude,
       // tokenMetadata: metadata,
       creator_address,
     },
   });
 
-  return logs;
+  return { logs, cpop };
 };
 
 export const claim = async (
@@ -249,7 +255,7 @@ export const claim = async (
   const connection = createRpc(RPC_ENDPOINT);
 
   // Find the CPOP record by token address
-  const cpop = await prisma.cPOP.findFirst({
+  const cpop = await prisma.cpop.findFirst({
     where: {
       tokenAddress: mint_address.toString(),
     },
@@ -260,7 +266,7 @@ export const claim = async (
   }
 
   // Check if claim already exists
-  const existingClaim = await prisma.cPOPClaim.findFirst({
+  const existingClaim = await prisma.cpopClaim.findFirst({
     where: {
       cpopId: cpop.id,
       walletAddress: wallet_address.toString(),
@@ -284,7 +290,7 @@ export const claim = async (
   console.log(`transfer-compressed success! txId: ${transferCompressedTxId}`);
 
   // Store the claim record
-  await prisma.cPOPClaim.create({
+  await prisma.cpopClaim.create({
     data: {
       cpopId: cpop.id,
       walletAddress: wallet_address.toString(),

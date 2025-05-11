@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { NextRequest, NextResponse } from "next/server";
-import { claim } from "../actions";
+import { claim } from "../../actions";
 
 export const GET = async (request: NextRequest) => {
   const { wallet_address, mint_address } = await request.json();

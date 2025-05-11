@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { QRCode } from "react-qrcode-logo";
 import { z } from "zod";
 
 import createToken from "@/app/actions";
@@ -89,6 +90,7 @@ export default function CPOPCreatorForm() {
       tx: string;
     }[]
   >([]);
+  const [cpop, setCpop] = useState<string | null>();
   const { connection } = useConnection();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -164,7 +166,7 @@ export default function CPOPCreatorForm() {
     try {
       setIsSubmitting(true);
 
-      const logs = await createToken({
+      const { logs, cpop } = await createToken({
         name: values.eventName,
         symbol: values.organizerName,
         uri: values.website,
@@ -183,10 +185,13 @@ export default function CPOPCreatorForm() {
         endDate: values.endDate,
         amount: values.amount,
         location: values.location,
+        latitude: parseFloat(values.latitude),
+        longitude: parseFloat(values.longitude),
         creator_address: publicKey.toString(),
       });
 
       setTxLogs(logs);
+      setCpop(cpop.id);
 
       toast({
         title: "cPOP created!",
@@ -251,41 +256,33 @@ export default function CPOPCreatorForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-3 gap-6">
-                <div>
+                <div className="grid place-items-center">
                   <div>
-                    <p className="text-gray-400 mb-2 text-center text-xs">
-                      Upload an image for your cPOP
-                    </p>
-
                     {form.watch("imageUrl") ? (
                       <div className="w-full grid place-items-center">
                         <img
                           src={form.watch("imageUrl")}
-                          alt="Uploaded Image"
+                          alt=""
                           className="w-40 h-40 rounded-full"
                         />
                       </div>
                     ) : (
-                      <div className="w-full">
-                        <img
-                          src={form.watch("imageUrl")}
-                          alt="Uploaded Image"
-                          className="w-full h-full object-cover"
+                      <>
+                        <p className="text-gray-400 mb-2 text-center text-xs">
+                          Upload an image for your cPOP
+                        </p>
+                        <UploadButton
+                          endpoint="imageUploader"
+                          onClientUploadComplete={(res) => {
+                            console.log("Files: ", res);
+                            form.setValue("imageUrl", res[0].ufsUrl);
+                          }}
+                          onUploadError={(error: Error) => {
+                            alert(`ERROR! ${error.message}`);
+                          }}
                         />
-                      </div>
+                      </>
                     )}
-
-                    <UploadButton
-                      endpoint="imageUploader"
-                      onClientUploadComplete={(res) => {
-                        console.log("Files: ", res);
-                        form.setValue("imageUrl", res[0].ufsUrl);
-                        alert("Upload Completed");
-                      }}
-                      onUploadError={(error: Error) => {
-                        alert(`ERROR! ${error.message}`);
-                      }}
-                    />
                   </div>
                 </div>
 
@@ -524,7 +521,7 @@ export default function CPOPCreatorForm() {
       </Card>
 
       {txLogs.length > 1 ? (
-        <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-700 mb-5">
+        <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-200 dark:border-gray-700 mb-5">
           {txLogs.map((logs) => {
             return (
               <p key={logs.txId}>
@@ -540,6 +537,55 @@ export default function CPOPCreatorForm() {
               </p>
             );
           })}
+        </div>
+      ) : null}
+
+      {cpop ? (
+        <div className="mt-4 dark:bg-[#111] p-4 rounded-md border border-gray-200 dark:border-gray-700 mb-5 grid place-items-center space-y-4">
+          <p>QR Code for your cPOP</p>
+          <QRCode value={`${cpop}`} qrStyle="fluid" />
+
+          <Button
+            onClick={async () => {
+              try {
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                  cpop
+                )}`;
+
+                // Fetch the QR code image
+                const response = await fetch(qrCodeUrl);
+                const blob = await response.blob();
+
+                // Create a download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "cpop-qr.png";
+
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+
+                // Cleanup
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                toast({
+                  title: "Success",
+                  description: "QR code downloaded successfully",
+                });
+              } catch (error) {
+                console.error("Error downloading QR code:", error);
+                toast({
+                  title: "Error",
+                  description: "Failed to download QR code",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            Download QR Code
+          </Button>
         </div>
       ) : null}
 
