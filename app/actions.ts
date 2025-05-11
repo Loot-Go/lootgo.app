@@ -240,6 +240,31 @@ const createToken = async ({
     },
   });
 
+  try {
+    const response = await fetch(
+      `https://white-art-c8ed.devzstudio.workers.dev/`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          lat: latitude,
+          lng: longitude,
+          image: imageUrl,
+          token_value: {
+            title: eventName,
+            sub_title: organizerName,
+            description: description,
+            location,
+          },
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+
   return { logs, cpop };
 };
 
