@@ -277,7 +277,7 @@ export const claim = async (
     connection,
     payer,
     mint,
-    1e5,
+    1e9,
     payer,
     to
   );
