@@ -250,6 +250,7 @@ const createToken = async ({
           lng: longitude,
           image: imageUrl,
           token_value: {
+            id: cpop.id,
             title: eventName,
             sub_title: organizerName,
             description: description,

@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import Link from "next/link";
 
 const formSchema = z
   .object({
@@ -215,7 +216,16 @@ export default function CPOPCreatorForm() {
     <div>
       <Card>
         <CardContent className="pt-6">
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end mb-6 gap-4 items-center">
+            {publicKey ? (
+              <Link
+                href={`/view/${publicKey?.toString()}`}
+                className="mr-4 text-gray-400 hover:text-gray-200"
+              >
+                View Events
+              </Link>
+            ) : null}
+
             <WalletMultiButton />
           </div>
 
