@@ -16,7 +16,7 @@ With **cPOP integration**, **any creator can mint and distribute cPOP tokens (co
 **Creator portal (for organizers):**
 
 1. Connect wallet and fill in event details (title, description, location).
-2. That’s it! We mint and manage the cPOP campaign on-chain.
+2. That’s it! We mint and manage the cPOP campaign onchain.
 
 **Player app (for users):**
 
