@@ -30,5 +30,6 @@ With **cPOP integration**, **any creator can mint and distribute cPOP tokens (co
 <img width="1256" alt="Screenshot 2025-05-12 at 11 51 55" src="https://github.com/user-attachments/assets/aa3548ee-a9d0-4406-bf2c-b0cc34e50625" />
 
 Dashboard link : [https://lootgo-cpop.vercel.app](https://lootgo-cpop.vercel.app/)
-
-App link :
+iOS : https://testflight.apple.com/join/W2kMaSG6
+Android : https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view
+invite code: 1000x
