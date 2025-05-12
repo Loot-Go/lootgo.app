@@ -1,4 +1,4 @@
-# LootGO with cPop Creator
+# LootGO with cPOP Creator
 <img width="1255" alt="Screenshot 2025-05-12 at 11 51 23" src="https://github.com/user-attachments/assets/223f8890-0a73-4f74-b626-c2a82f4a3df4" />
 
 LootGO – The Real-World Crypto Treasure Hunt, aka. PokémonGO with crypto rewards
