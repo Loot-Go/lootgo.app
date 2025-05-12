@@ -7,7 +7,7 @@ import {
   createTokenPool,
   transfer,
 } from "@lightprotocol/compressed-token";
-import { confirmTx, createRpc } from "@lightprotocol/stateless.js";
+import { createRpc } from "@lightprotocol/stateless.js";
 import {
   createInitializeMetadataPointerInstruction,
   createInitializeMintInstruction,
@@ -95,10 +95,10 @@ const createToken = async ({
 
       // @jijin this is just to get devnet tokens to make txs
       // airdrop to pay gas
-      await confirmTx(
-        connection,
-        await connection.requestAirdrop(payer.publicKey, 1e7)
-      );
+      // await confirmTx(
+      //   connection,
+      //   await connection.requestAirdrop(payer.publicKey, 1e7)
+      // );
 
       const mintLamports = await connection.getMinimumBalanceForRentExemption(
         mintLen + metadataLen
