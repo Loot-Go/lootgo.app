@@ -1,10 +1,11 @@
-import type { Metadata } from "next"
-import CPOPCreatorForm from "@/components/cpop-creator-form"
+import CPOPCreatorForm from "@/components/cpop-creator-form";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "cPOP Creator | ZK Compression",
-  description: "Create compressed Proof of Participation tokens for Solana events",
-}
+  description:
+    "Create compressed Proof of Participation tokens for Solana events",
+};
 
 export default function Home() {
   return (
@@ -15,5 +16,5 @@ export default function Home() {
       </p>
       <CPOPCreatorForm />
     </main>
-  )
+  );
 }

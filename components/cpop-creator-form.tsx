@@ -163,7 +163,7 @@ export default function CPOPCreatorForm() {
     try {
       setIsSubmitting(true);
 
-      const { logs, cpop } = await createToken({
+      const { logs, cpop, error, message } = await createToken({
         name: values.eventName,
         symbol: values.organizerName,
         uri: values.website,
@@ -187,16 +187,27 @@ export default function CPOPCreatorForm() {
         creator_address: publicKey.toString(),
       });
 
-      setTxLogs(logs);
-      setCpop(cpop.id);
+      if (error) {
+        toast({
+          title: "Error",
+          description: message as string,
+          variant: "destructive",
+        });
+        return;
+      } else {
+        if (logs) {
+          setTxLogs(logs);
+          setCpop(cpop.id);
 
-      toast({
-        title: "cPOP created!",
-        description: `Successfully created ${values.amount} cPOP tokens for "${values.eventName}"`,
-      });
+          toast({
+            title: "cPOP created!",
+            description: `Successfully created ${values.amount} cPOP tokens for "${values.eventName}"`,
+          });
 
-      // Reset the form
-      form.reset();
+          // Reset the form
+          form.reset();
+        }
+      }
     } catch (error) {
       console.error("Error creating cPOP:", error);
       toast({
