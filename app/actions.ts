@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getRpcUrl } from "@/lib/utils";
 import {
   compress,
   createTokenPool,
@@ -74,7 +75,7 @@ const createToken = async ({
       const payer = Keypair.fromSecretKey(
         bs58.decode(process.env.PAYER_KEYPAIR!)
       );
-      const RPC_ENDPOINT = process.env.RPC_CLIENT!;
+      const RPC_ENDPOINT = getRpcUrl();
       const connection = createRpc(RPC_ENDPOINT);
       // @ jijin mint address (token address) -- save in backend for airdrops
       const mint = Keypair.generate();
@@ -286,7 +287,7 @@ export const claim = async (
 ) => {
   const payer = Keypair.fromSecretKey(bs58.decode(process.env.PAYER_KEYPAIR!));
 
-  const RPC_ENDPOINT = process.env.RPC_CLIENT!;
+  const RPC_ENDPOINT = getRpcUrl();
   const connection = createRpc(RPC_ENDPOINT);
 
   // Find the CPOP record by token address
