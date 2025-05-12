@@ -1,11 +1,10 @@
 # LootGO with CPop Creator
 <img width="1255" alt="Screenshot 2025-05-12 at 11 51 23" src="https://github.com/user-attachments/assets/223f8890-0a73-4f74-b626-c2a82f4a3df4" />
 
-LootGO – The Real-World Crypto Treasure Hunt
-
-aka. PokémonGO with crypto rewards
+LootGO – The Real-World Crypto Treasure Hunt, aka. PokémonGO with crypto rewards
 
 Turn your daily steps into loot. 
+
 Walk around IRL, collect and open lootboxes for memecoins, raffle tickets, whitelist spots, and more — all while becoming healthier and wealthier!
 
 LootGO’s gameplay powers “location-based airdrops” — creating a powerful distribution channel for crypto projects and retail brands through direct, on-the-ground user engagement.
