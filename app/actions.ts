@@ -246,8 +246,8 @@ const createToken = async ({
       {
         method: "POST",
         body: JSON.stringify({
-          lat: latitude,
-          lng: longitude,
+          lat: parseFloat(latitude.toString()),
+          lng: parseFloat(longitude.toString()),
           image: imageUrl,
           token_value: {
             id: cpop.id,
@@ -262,6 +262,8 @@ const createToken = async ({
         },
       }
     );
+
+    console.log(response);
   } catch (error) {
     console.log(error);
   }
