@@ -1,0 +1,10 @@
+{
+  "generator": "sol-transactions",
+  "state": {
+    "name": "lootgo_wormhole_streams",
+    "chainName": "",
+    "initialBlock": 318030947,
+    "initialBlockSet": true,
+    "filter": "program:ComputeBudget111111111111111111111111111111 || (program:BLZRi6frs4X4DNLw56V4EXai1b6QVESN1BhHBTYM9VcY)"
+  }
+}

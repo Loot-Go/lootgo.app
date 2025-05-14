@@ -25,3 +25,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# substreams
+.substreams.env
+.substreams.env.local
+.envrc
+.idea
+/target/
+*.spkg
+*~
+/env/
+/build
+debug.log
+replay.log
+.DS_Store 
+target/
+sink-data/
+*.spkg
