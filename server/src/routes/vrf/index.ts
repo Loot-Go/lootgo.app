@@ -1,8 +1,14 @@
 import { Request, Response } from "express";
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { UseRandomness } from "./use_randomness";
-import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
+import { RandomNoGenerator } from "./random_no_generator";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import bs58 from "bs58";
 import idl from "./idl.json";
 
@@ -18,27 +24,74 @@ const getKeypairFromString = (secretKeyString: string) => {
 
 export async function Vrf(_req: Request, res: Response) {
   try {
-    // Setup connection
-    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+    const connection = new Connection(
+      "https://rpc.magicblock.app/devnet",
+      "confirmed"
+    );
 
-    // Setup wallet using private key from environment variable
     const privateKey = process.env.SOLANA_WALLET_PRIVATE_KEY;
     if (!privateKey)
       throw new Error("WALLET_PRIVATE_KEY environment variable is required");
-    const wallet = new anchor.Wallet(getKeypairFromString(privateKey));
+    const keypair = getKeypairFromString(privateKey);
+    const wallet = new anchor.Wallet(keypair);
 
-    // Create provider
-    const provider = new anchor.AnchorProvider(connection, wallet, {});
-    anchor.setProvider(provider);
+    const provider = new anchor.AnchorProvider(
+      connection,
+      {
+        publicKey: wallet.publicKey,
+        signTransaction: async <T extends Transaction | VersionedTransaction>(
+          transaction: T
+        ): Promise<T> => {
+          // @ts-ignore
+          transaction.sign(keypair);
+          return transaction;
+        },
+        signAllTransactions: async <
+          T extends Transaction | VersionedTransaction
+        >(
+          transactions: T[]
+        ): Promise<T[]> => {
+          for (const tx of transactions) {
+            // @ts-ignore
+            tx.sign(keypair);
+          }
+          return transactions;
+        },
+      },
+      anchor.AnchorProvider.defaultOptions()
+    );
 
-    const program = new anchor.Program(idl, provider) as Program<UseRandomness>;
+    const program = new anchor.Program(
+      idl,
+      provider
+    ) as Program<RandomNoGenerator>;
+
+    const userPk = PublicKey.findProgramAddressSync(
+      [Buffer.from("userd"), provider.publicKey.toBytes()],
+      program.programId
+    )[0];
+    let account = await connection.getAccountInfo(userPk);
+
+    if (!account || !account.data || account.data.length === 0) {
+      console.log("user account not found, creating new one...");
+      const tx = await program.methods.initialize().rpc();
+      console.log("User initialized with tx:", tx);
+    }
 
     const randomSeed = Math.floor(Math.random() * 256);
-    const tx = await program.methods.requestRandomness(randomSeed).rpc();
+    const tx = await program.methods.getNumber(randomSeed).rpc();
+
+    let randomNo = undefined;
+
+    account = await connection.getAccountInfo(userPk);
+    if (account) {
+      const user = program.coder.accounts.decode("user", account.data);
+      randomNo = user.lastResult;
+    }
 
     return res.status(200).json({
+      randomNo: randomNo,
       tx: tx,
-      publicKey: provider.wallet.publicKey.toString(),
     });
   } catch (e: any) {
     console.error("Error:", e);

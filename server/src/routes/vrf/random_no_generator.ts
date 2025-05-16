@@ -1,14 +1,20 @@
-{
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/random_no_generator.json`.
+ */
+export type RandomNoGenerator = {
   "address": "CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC",
   "metadata": {
-    "name": "random_no_generator",
+    "name": "randomNoGenerator",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
   "instructions": [
     {
-      "name": "callback_get_number",
+      "name": "callbackGetNumber",
       "discriminator": [
         10,
         222,
@@ -21,7 +27,7 @@
       ],
       "accounts": [
         {
-          "name": "vrf_program_identity",
+          "name": "vrfProgramIdentity",
           "docs": [
             "This check ensure that the vrf_program_identity (which is a PDA) is a singer",
             "enforcing the callback is executed by the VRF program trough CPI"
@@ -47,7 +53,7 @@
       ]
     },
     {
-      "name": "get_number",
+      "name": "getNumber",
       "discriminator": [
         124,
         80,
@@ -86,12 +92,12 @@
           }
         },
         {
-          "name": "oracle_queue",
+          "name": "oracleQueue",
           "writable": true,
           "address": "Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh"
         },
         {
-          "name": "program_identity",
+          "name": "programIdentity",
           "pda": {
             "seeds": [
               {
@@ -111,21 +117,21 @@
           }
         },
         {
-          "name": "vrf_program",
+          "name": "vrfProgram",
           "address": "Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz"
         },
         {
-          "name": "slot_hashes",
+          "name": "slotHashes",
           "address": "SysvarS1otHashes111111111111111111111111111"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "client_seed",
+          "name": "clientSeed",
           "type": "u8"
         }
       ]
@@ -171,7 +177,7 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -180,7 +186,7 @@
   ],
   "accounts": [
     {
-      "name": "User",
+      "name": "user",
       "discriminator": [
         159,
         117,
@@ -195,16 +201,16 @@
   ],
   "types": [
     {
-      "name": "User",
+      "name": "user",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "last_result",
+            "name": "lastResult",
             "type": "u8"
           }
         ]
       }
     }
   ]
-}
+};
