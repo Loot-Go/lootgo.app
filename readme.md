@@ -14,10 +14,9 @@ LootGO’s gameplay powers “location-based airdrops” — creating a powerful
 
 | Purpose | Link |
 |---------|------|
-| **Main hackathon repo** | `[https://github.com/lootgo/lootgo-main](https://github.com/loot-Go/lootgo.app)` |
-| **Treasure hunt repo** | `[[https://github.com/lootgo/lootgo-main](https://github.com/loot-Go/lootgo.app)](https://github.com/Loot-Go/lootgo-app/tree/feat/solana-wallets)` (Private, contact yuki@beyondclub.xyz to access) |
+| **Main hackathon repo** | https://github.com/loot-Go/lootgo.app |
+| **Treasure hunt repo** | https://github.com/Loot-Go/lootgo-app/tree/feat/solana-wallets (Private, contact yuki@beyondclub.xyz to access) |
 | iOS TestFlight | [TestFlight](https://testflight.apple.com/join/57xWEm9G) |
-| Android APK | [Download APK](https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view) |
 | Android APK | [Download APK](https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view) |
 | Invite Code | `1000x` |
 
@@ -30,9 +29,7 @@ LootGO’s gameplay powers “location-based airdrops” — creating a powerful
 | **Onboarding** | Privy | Email login with embedded wallet. Power users can connect with Solana Mobile Wallet Adapter. |
 | **Core Game Loop** | Geo-triggers → Lootbox smart contract | Walking spawns / opens lootboxes → on-chain reward events |
 | **Randomness** | MagicBlock Ephemeral VRF | Verifiable randomness for rewards and lootbox spawns |
-| **Rewards** | • SPL tokens (MagicBlock VRF + zk-compression)  
-• cPOP tokens  
-• Metaplex NFTs | Token, proof-of-participation, and collectible rewards |
+| **Rewards** | 1. SPL tokens (ZK Compression)  2. cPOP tokens  3. Metaplex NFTs | Token, proof-of-participation, and collectible rewards |
 | **Scaling** | ZK Compression | Stores rewards in Merkle trees; no upfront rent needed |
 | **Trading** | Jupiter + Wormhole + The Graph | In-app SOL swaps and cross-chain swap |
 
