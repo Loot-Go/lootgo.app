@@ -1,4 +1,4 @@
-# LootGO with cPOP Creator
+# LootGO – The Real-World Crypto Treasure Hunt
 <img width="1255" alt="Screenshot 2025-05-12 at 11 51 23" src="https://github.com/user-attachments/assets/223f8890-0a73-4f74-b626-c2a82f4a3df4" />
 
 LootGO – The Real-World Crypto Treasure Hunt, aka. PokémonGO with crypto rewards
@@ -9,30 +9,79 @@ Walk around IRL, collect and open lootboxes for memecoins, raffle tickets, white
 
 LootGO’s gameplay powers “location-based airdrops” — creating a powerful distribution channel for crypto projects and retail brands through direct, on-the-ground user engagement.
 
-## cPOP Creator
-
-With **cPOP integration**, **any creator can mint and distribute cPOP tokens (compressed SPL tokens) directly through our map**—rewarding users for showing up at physical events, booths, or stores with a verifiable proof of presence. Great for activating communities, tracking attendance, or distributing perks.
-
-**Creator portal (for organizers):**
-
-1. Connect wallet and fill in event details (title, description, location).
-2. That’s it! We mint and manage the cPOP campaign onchain.
-
-<img width="1255" alt="Screenshot 2025-05-12 at 11 51 39" src="https://github.com/user-attachments/assets/ec67f8e8-af74-4aa9-8b59-3c3e69bab411" />
+## 1. Repositories & Demo Apps
 
 
-**Player app (for users):**
+| Purpose | Link |
+|---------|------|
+| **Main hackathon repo** | `[https://github.com/lootgo/lootgo-main](https://github.com/loot-Go/lootgo.app)` |
+| **Treasure hunt repo** | `[[https://github.com/lootgo/lootgo-main](https://github.com/loot-Go/lootgo.app)](https://github.com/Loot-Go/lootgo-app/tree/feat/solana-wallets)` (Private, contact yuki@beyondclub.xyz to access) |
+| iOS TestFlight | [TestFlight](https://testflight.apple.com/join/57xWEm9G) |
+| Android APK | [Download APK](https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view) |
+| Android APK | [Download APK](https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view) |
+| Invite Code | `1000x` |
 
-1. Find cPOP badges on the LootGO map with event info.
-2. Walk into the geo-fence, tap “Check-In,” and scan the on-site QR.
-3. Receive the compressed token (cPOP) instantly via lootbox.
 
-<img width="1256" alt="Screenshot 2025-05-12 at 11 51 55" src="https://github.com/user-attachments/assets/aa3548ee-a9d0-4406-bf2c-b0cc34e50625" />
+## 2. Architecture Overview
 
-Dashboard link : [https://lootgo-cpop.vercel.app](https://lootgo-cpop.vercel.app/)
+| Layer | Tech | What It Does |
+|-------|------|--------------|
+| **Mobile** | React Native + Expo | Native performance, fast iteration |
+| **Onboarding** | Privy | Email login with embedded wallet. Power users can connect with Solana Mobile Wallet Adapter. |
+| **Core Game Loop** | Geo-triggers → Lootbox smart contract | Walking spawns / opens lootboxes → on-chain reward events |
+| **Randomness** | MagicBlock Ephemeral VRF | Verifiable randomness for rewards and lootbox spawns |
+| **Rewards** | • SPL tokens (MagicBlock VRF + zk-compression)  
+• cPOP tokens  
+• Metaplex NFTs | Token, proof-of-participation, and collectible rewards |
+| **Scaling** | ZK Compression | Stores rewards in Merkle trees; no upfront rent needed |
+| **Trading** | Jupiter + Wormhole + The Graph | In-app SOL swaps and cross-chain swap |
 
-iOS : https://testflight.apple.com/join/W2kMaSG6
+## 3. Track-Specific Submissions
 
-Android : https://drive.google.com/file/d/12z_7GCIk5GgrqFsmoj36yWOhY9_SsNXN/view
+### 3-1. ZK Compression
+Scalable token drops & cPOP
 
-invite code: 1000x
+* Micro-rewards at scale – Lootbox SPL rewards are logged in a compressed Merkle tree; players claim on demand, skipping rent-exempt ATA creation.
+
+* cPOP – Any event/brand can issue compressed proof-of-participation tokens directly on our map.
+
+Code ▶ lootgo-compression/contracts/
+
+cPOP Dashboard link ▶ https://lootgo-cpop.vercel.app
+
+### 3-2. MagicBlock VRF
+
+Provable randomness everywhere
+
+Token amount (We integrated VRF to this first)
+Lootbox rarity
+Reward token selection
+Spawn coordinates
+Raffle winner selection
+
+Code ▶ lootgo-vrf/contracts/
+
+### 3-3. Metaplex
+
+Instant NFT airdrops
+Milestone badges, cosmetics, limited collectibles.
+
+Code ▶ lootgo-nft-drop/
+
+### 3-4. Jupiter
+
+In-app Solana swaps
+Users trade memecoins without leaving LootGO.
+
+Code ▶ lootgo-jupiter/
+
+### 3-5. Wormhole + The Graph
+
+Cross-chain swaps & surprise bonuses
+
+Walk-to-earn on any chain → swap to SOL via Mayan Swift.
+Transaction history is indexed with Substreams; glowing rows signal hidden prizes (extra BONK, NFTs, etc.).
+
+Code ▶ lootgo-wormhole/
+
+
