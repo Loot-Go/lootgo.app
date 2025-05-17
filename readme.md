@@ -87,3 +87,7 @@ Transaction history is indexed with Substreams; glowing rows signal hidden prize
 Code ▶ lootgo-wormhole/
 
 Sample Transaction ▶ 
+https://wormholescan.io/#/tx/4Pnte2ESg436woZmDFsLnrPrVhuNCrEFA1iwnCrwumr1zb4cXDFtWcxmdb7YNipq2joUmh7My3StLvyYihVAjHHA?network=Mainnet
+
+Substreams Package ▶ 
+https://earn.superteam.fun/listing/indexing-the-graph-substreams-on-solana/
