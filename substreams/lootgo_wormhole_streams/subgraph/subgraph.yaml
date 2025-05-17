@@ -1,0 +1,19 @@
+specVersion: 1.0.0
+description: lootgo-wormhole-streams Substreams-powered-Subgraph
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: substreams
+    name: lootgo_wormhole_streams
+    network: solana-mainnet-beta
+    source:
+      package:
+        moduleName: map_my_data
+        file: ../lootgo-wormhole-streams-v0.1.0.spkg
+    mapping:
+      apiVersion: 0.0.7
+      kind: substreams/graph-entities
+      file: ./src/mappings.ts
+      handler: handleTriggers
