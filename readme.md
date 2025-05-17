@@ -39,13 +39,15 @@ LootGO’s gameplay powers “location-based airdrops” — creating a powerful
 
 Scalable token drops & cPOP
 
-- Micro-rewards at scale – Lootbox SPL rewards are logged in a compressed Merkle tree; players claim on demand, skipping rent-exempt ATA creation.
+- Micro-rewards at scale – Lootbox SPL rewards are logged in a compressed Merkle tree; players claim and decompress on demand, skipping rent-exempt ATA creation.
 
 - cPOP – Any event/brand can issue compressed proof-of-participation tokens directly on our map.
 
 Code ▶ lootgo-compression/contracts/
 
 cPOP Dashboard link ▶ https://lootgo-cpop.vercel.app
+
+Sample Transaction of decompression: https://solscan.io/tx/2pnqG8JCWhZu7veDDgUFf2CWk9CGnnJcPK931y6ySXPDwQ9WDjLrPvgr9DRfP8hk487jsZFCWXCsSSysBqis16sy?cluster=devnet
 
 ### 3-2. MagicBlock VRF
 
