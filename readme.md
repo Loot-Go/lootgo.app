@@ -61,7 +61,7 @@ Raffle winner selection
 
 Code ▶ lootgo-vrf/contracts/
 
-Contract ▶ https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?cluster=devnet
+VRF ▶ https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?cluster=devnet
 
 ### 3-3. Metaplex
 
@@ -85,3 +85,5 @@ Walk-to-earn on any chain → swap to SOL via Mayan Swift.
 Transaction history is indexed with Substreams; glowing rows signal hidden prizes (extra BONK, NFTs, etc.).
 
 Code ▶ lootgo-wormhole/
+
+Sample Transaction ▶ 
