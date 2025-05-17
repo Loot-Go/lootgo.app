@@ -43,8 +43,6 @@ Scalable token drops & cPOP
 
 - cPOP – Any event/brand can issue compressed proof-of-participation tokens directly on our map.
 
-Code ▶ lootgo-compression/contracts/
-
 Token Contract Address :
 
 AL5XFoQwkPoRcybziPenQWTYi95hq1KGfiZyBCLtsRgj
@@ -69,8 +67,6 @@ Provable randomness everywhere
 * Spawn coordinates
 * Raffle winner selection
 
-Code ▶ lootgo-vrf/contracts/
-
 Number Selection:  https://github.com/Loot-Go/lootgo.app/blob/main/web/lib/random-number.ts
 
 VRF ▶ https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?cluster=devnet
@@ -80,8 +76,6 @@ VRF ▶ https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?
 Instant NFT airdrops
 Milestone badges, cosmetics, limited collectibles.
 
-Code ▶ lootgo-nft-drop/
-
 https://github.com/Loot-Go/lootgo.app/blob/main/web/app/api/mint_nft/route.ts
 
 ### 3-4. Jupiter
@@ -89,7 +83,6 @@ https://github.com/Loot-Go/lootgo.app/blob/main/web/app/api/mint_nft/route.ts
 In-app Solana swaps
 Users trade memecoins without leaving LootGO.
 
-Code ▶ lootgo-jupiter/
 
 ### 3-5. Wormhole + The Graph
 
@@ -98,7 +91,6 @@ Cross-chain swaps & surprise bonuses
 Walk-to-earn on any chain → swap to SOL via Mayan Swift.
 Transaction history is indexed with Substreams; glowing rows signal hidden prizes (extra BONK, NFTs, etc.).
 
-Code ▶ lootgo-wormhole/
 
 Subgraph: https://github.com/Loot-Go/lootgo.app/blob/main/substreams/lootgo_wormhole_streams/subgraph/subgraph.yaml 
 
