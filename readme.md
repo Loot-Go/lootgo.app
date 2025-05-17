@@ -53,11 +53,11 @@ Sample Transaction of decompression ▶ https://solscan.io/tx/2pnqG8JCWhZu7veDDg
 
 Provable randomness everywhere
 
-Token amount (We integrated VRF to this first)
-Lootbox rarity
-Reward token selection
-Spawn coordinates
-Raffle winner selection
+* Token amount (We integrated VRF to this first)
+* Lootbox rarity
+* Reward token selection
+* Spawn coordinates
+* Raffle winner selection
 
 Code ▶ lootgo-vrf/contracts/
 
