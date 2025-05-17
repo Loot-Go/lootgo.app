@@ -59,6 +59,9 @@ Raffle winner selection
 
 Code ▶ lootgo-vrf/contracts/
 
+Contract
+https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?cluster=devnet
+
 ### 3-3. Metaplex
 
 Instant NFT airdrops
