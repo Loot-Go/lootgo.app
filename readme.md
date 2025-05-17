@@ -14,7 +14,7 @@ LootGO’s gameplay powers “location-based airdrops” — creating a powerful
 
 | Purpose | Link |
 |---------|------|
-| **Main hackathon repo** | https://github.com/loot-Go/lootgo.app |
+| **Main hackathon repo** | https://github.com/loot-Go/lootgo.app (Public) |
 | **Treasure hunt repo** | https://github.com/Loot-Go/lootgo-app/tree/feat/solana-wallets (Private, contact yuki@beyondclub.xyz to access) |
 | iOS TestFlight | [TestFlight](https://testflight.apple.com/join/57xWEm9G) |
 | Android APK | [Download APK](https://drive.google.com/file/d/1qHxmlSulMRBMjJ8Eh30KRGGJNCJe9q-R/view?usp=sharing) |
