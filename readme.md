@@ -45,6 +45,16 @@ Scalable token drops & cPOP
 
 Code ▶ lootgo-compression/contracts/
 
+Token Contract Address :
+
+AL5XFoQwkPoRcybziPenQWTYi95hq1KGfiZyBCLtsRgj
+
+72GUif1vsb9L7e5iuxboVxSKsD6UXnnD7kjnYv4bXekU
+
+Token Decompression     : https://github.com/Loot-Go/lootgo.app/blob/main/web/lib/token-decompress.ts 
+
+Compressed Token Airdrop: https://github.com/Loot-Go/lootgo.app/blob/main/web/lib/solana-drop.ts
+
 cPOP Dashboard link ▶ https://lootgo-cpop.vercel.app
 
 Sample Transaction of decompression ▶ https://solscan.io/tx/2pnqG8JCWhZu7veDDgUFf2CWk9CGnnJcPK931y6ySXPDwQ9WDjLrPvgr9DRfP8hk487jsZFCWXCsSSysBqis16sy?cluster=devnet
@@ -61,6 +71,8 @@ Provable randomness everywhere
 
 Code ▶ lootgo-vrf/contracts/
 
+Number Selection:  https://github.com/Loot-Go/lootgo.app/blob/main/web/lib/random-number.ts
+
 VRF ▶ https://solscan.io/account/CXGh7AwHyRn6Y2iZBAd9yf8LHtigPgrtcu2661311MQC?cluster=devnet
 
 ### 3-3. Metaplex
@@ -69,6 +81,8 @@ Instant NFT airdrops
 Milestone badges, cosmetics, limited collectibles.
 
 Code ▶ lootgo-nft-drop/
+
+https://github.com/Loot-Go/lootgo.app/blob/main/web/app/api/mint_nft/route.ts
 
 ### 3-4. Jupiter
 
@@ -85,6 +99,10 @@ Walk-to-earn on any chain → swap to SOL via Mayan Swift.
 Transaction history is indexed with Substreams; glowing rows signal hidden prizes (extra BONK, NFTs, etc.).
 
 Code ▶ lootgo-wormhole/
+
+Subgraph: https://github.com/Loot-Go/lootgo.app/blob/main/substreams/lootgo_wormhole_streams/subgraph/subgraph.yaml 
+
+Substreams: https://github.com/Loot-Go/lootgo.app/blob/main/substreams/lootgo_wormhole_streams/substreams.yaml
 
 Sample Transaction ▶ 
 https://wormholescan.io/#/tx/4Pnte2ESg436woZmDFsLnrPrVhuNCrEFA1iwnCrwumr1zb4cXDFtWcxmdb7YNipq2joUmh7My3StLvyYihVAjHHA?network=Mainnet
